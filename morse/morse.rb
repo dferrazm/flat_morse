@@ -1,17 +1,40 @@
 require 'yaml'
 
-class Morse
-  DEFINITIONS = YAML.load_file('definitions.yml').freeze
+module Morse
+  class Definitions
+    def initialize(chars_map)
+      @chars_map = chars_map
+    end
+
+    def [](char)
+      @chars_map[char.upcase] || raise_error(char)
+    end
+
+    private
+
+    def raise_error(char)
+      raise InvalidChar.new(char)
+    end
+  end
+
+  DEFINITIONS = Definitions.new(YAML.load_file('definitions.yml')).freeze
   WORD_SEPARATOR = '/'.freeze
   CHAR_SEPARATOR = '|'.freeze
 
-  def encode(text)
-    InputText.new(text).encoded
+  class Encoder
+    def initialize(definitions = DEFINITIONS)
+      @definitions = definitions
+    end
+
+    def encode(text)
+      InputText.new(text, @definitions).encoded
+    end
   end
 
   class InputText
-    def initialize(text)
-      @text = (text || '').upcase
+    def initialize(text, definitions = DEFINTIONS)
+      @text = text || ''
+      @definitions = definitions
     end
 
     def encoded
@@ -20,28 +43,35 @@ class Morse
 
     private
 
+    def encoded_words
+      words.map do |word|
+        InputWord.new(word, @definitions).encoded
+      end
+    end
+
     def words
       @text.split(' ')
     end
+  end
 
-    def encoded_words
-      words.map { |word| encoded_word(word) }
+  class InputWord
+    def initialize(word, definitions = DEFINITIONS)
+      @word = word
+      @definitions = definitions
     end
 
-    def encoded_word(word)
-      encoded_chars(word.chars).join(CHAR_SEPARATOR)
+    def encoded
+      encoded_chars.join(CHAR_SEPARATOR)
     end
 
-    def encoded_chars(chars)
-      chars.map { |char| encoded_char(char) }
+    private
+
+    def encoded_chars
+      chars.map { |char| @definitions[char] }
     end
 
-    def encoded_char(char)
-      DEFINITIONS[char] || raise_error(char)
-    end
-
-    def raise_error(char)
-      raise InvalidChar.new(char)
+    def chars
+      @word.chars
     end
   end
 
