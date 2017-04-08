@@ -39,4 +39,34 @@ class TestMorse < Minitest::Test
       @morse.encode('1 THE 2 QUICK 3 BROWN 4 FOX 5, JUMPS 6 OVER 7 THE 8 LAZY 9 DOG 10.')
     )
   end
+
+  def test_encoding_of_text_with_trailing_spaces
+    assert_equal(
+      '../.-|--/..|-./-|.-.|---|..-|-...|.-..|.',
+      @morse.encode('   I AM IN TROUBLE ')
+    )
+  end
+
+  def test_encoding_of_empty_string
+    assert_equal '', @morse.encode('')
+  end
+
+  def test_encoding_of_null_input
+    assert_equal '', @morse.encode(nil)
+  end
+
+  def test_encoding_of_a_sequence_of_whitespaces
+    assert_equal '', @morse.encode('   ')
+  end
+
+  def test_that_encoding_does_not_care_about_letter_case
+    assert_equal(
+      '../.-|--/..|-./-|.-.|---|..-|-...|.-..|.',
+      @morse.encode('I am in Trouble')
+    )
+  end
+
+  def test_raise_an_error_when_input_contains_unmapped_characters
+    assert_raises Morse::InvalidChar do @morse.encode('HELP!') end
+  end
 end

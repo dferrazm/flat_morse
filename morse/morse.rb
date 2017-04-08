@@ -11,7 +11,7 @@ class Morse
 
   class InputText
     def initialize(text)
-      @text = text
+      @text = (text || '').upcase
     end
 
     def encoded
@@ -33,9 +33,21 @@ class Morse
     end
 
     def encoded_chars(chars)
-      chars.map do |char|
-        DEFINITIONS[char]
-      end
+      chars.map { |char| encoded_char(char) }
+    end
+
+    def encoded_char(char)
+      DEFINITIONS[char] || raise_error(char)
+    end
+
+    def raise_error(char)
+      raise InvalidChar.new(char)
+    end
+  end
+
+  class InvalidChar < StandardError
+    def initialize(char)
+      super("Character '#{char}' is unmapped")
     end
   end
 end
