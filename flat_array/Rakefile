@@ -1,0 +1,8 @@
+task default: %w[flat_array:test]
+
+namespace :flat_array do
+  desc 'Run all the tests'
+  task :test do
+    ruby '-Ilib:test ./*_test.rb'
+  end
+end
