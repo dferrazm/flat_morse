@@ -67,14 +67,61 @@ module Morse
       @definitions = definitions
     end
 
-    def encode(text)
+    def encode_text(text)
       text_encoder(text).encoded
+    end
+
+    def encode_file(file)
+      file_encoder(file).encoded
     end
 
     private
 
     def text_encoder(text)
       TextEncoder.new(text, @definitions)
+    end
+
+    def file_encoder(filepath)
+      FileEncoder.new(filepath, @definitions)
+    end
+  end
+
+  class FileEncoder
+    def initialize(filepath, definitions = DEFINTIONS)
+      @file_path = filepath
+      @encoded_file_path = "#{@file_path}.encoded"
+      @definitions = definitions
+    end
+
+    def encoded
+      File.absolute_path(encoded_file)
+    end
+
+    private
+
+    def encoded_file
+      @encoded_file ||= begin
+        content = encoded_content
+
+        File.open(@encoded_file_path, "w+").tap do |f|
+          f.puts(content)
+          f.close
+        end
+      end
+    end
+
+    def encoded_content
+      @encoded_content ||= file_content.map do |line|
+        line_encoder(line).encoded
+      end
+    end
+
+    def file_content
+      @file_content ||= File.readlines(@file_path)
+    end
+
+    def line_encoder(line)
+      TextEncoder.new(line, @definitions)
     end
   end
 
