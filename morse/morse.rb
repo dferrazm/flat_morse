@@ -2,12 +2,12 @@ require 'yaml'
 
 module Morse
   class Definitions
-    def initialize(chars_map)
-      @chars_map = chars_map
+    def initialize(code_map)
+      @code_map = code_map
     end
 
-    def [](char)
-      @chars_map[char.upcase] || raise_error(char)
+    def code(char)
+      @code_map[char.upcase] || raise_error(char)
     end
 
     private
@@ -22,9 +22,8 @@ module Morse
       @definitions = definitions
     end
 
-    def [](char)
-      code = @definitions[char]
-      obfuscated(code)
+    def code(char)
+      obfuscated(@definitions.code(char))
     end
 
     private
@@ -59,6 +58,7 @@ module Morse
   end
 
   DEFINITIONS = Definitions.new(YAML.load_file('definitions.yml')).freeze
+  OBFUSCATED_DEFINITIONS = ObfuscatedDefinitions.new(DEFINITIONS).freeze
   WORD_SEPARATOR = '/'.freeze
   CHAR_SEPARATOR = '|'.freeze
 
@@ -68,11 +68,17 @@ module Morse
     end
 
     def encode(text)
-      InputText.new(text, @definitions).encoded
+      text_encoder(text).encoded
+    end
+
+    private
+
+    def text_encoder(text)
+      TextEncoder.new(text, @definitions)
     end
   end
 
-  class InputText
+  class TextEncoder
     def initialize(text, definitions = DEFINTIONS)
       @text = text || ''
       @definitions = definitions
@@ -85,17 +91,19 @@ module Morse
     private
 
     def encoded_words
-      words.map do |word|
-        InputWord.new(word, @definitions).encoded
-      end
+      words.map { |word| word_encoder(word).encoded }
     end
 
     def words
       @text.split(' ')
     end
+
+    def word_encoder(word)
+      WordEncoder.new(word, @definitions)
+    end
   end
 
-  class InputWord
+  class WordEncoder
     def initialize(word, definitions = DEFINITIONS)
       @word = word
       @definitions = definitions
@@ -108,7 +116,7 @@ module Morse
     private
 
     def encoded_chars
-      chars.map { |char| @definitions[char] }
+      chars.map { |char| @definitions.code(char) }
     end
 
     def chars
