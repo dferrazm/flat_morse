@@ -1,6 +1,17 @@
 require 'yaml'
 
 module Morse
+
+  # Class that wraps the characters code definitions. It receives
+  # a hash that maps each character that can be encoded to its target Morse code.
+  # With that, each mapped character can be encoded calling the `code` method.
+  # Example:
+  #
+  # defintions = Definitions.new({ 'a' => '.-', 'b' => '-...' })
+  # defintions.code('a') # Returns '.-'
+  # defintions.code('b') # Returns '-...'
+  # defintions.code('c') # Returns InvalidChar error
+  #
   class Definitions
     def initialize(code_map)
       @code_map = code_map
@@ -17,6 +28,21 @@ module Morse
     end
   end
 
+  # Represents an obfuscated set of Morse code definitions. It decorates
+  # a Definitions instance to return the resultant Morse code obfuscated, for a given character.
+  # The obfuscation happens in the following manner:
+  # - It replaces each sequence of dots with a number correnponding to the length of the sequence;
+  # - It replaces each sequence of dashes with the letter in the alphabet (A...Z), grabbed by a given position,
+  #   where the position corresponds the length of the sequence
+  #
+  # Example:
+  #
+  # defintions = Definitions.new({ 'b' => '-...', 'j' => '.---' })
+  # obuscated = ObfuscatedDefinitions.new(definitions)
+  # obfuscated.code('b') # Returns 'A3'
+  # obfuscated.code('j') # Returns '1C'
+  # obfuscated.code('c') # Returns InvalidChar error
+  #
   class ObfuscatedDefinitions
     def initialize(definitions)
       @definitions = definitions
@@ -52,8 +78,8 @@ module Morse
     DASH = '-'.freeze
 
     OBFUSCATOR = {
-      DOT => ->(dots) { dots.length },
-      DASH => ->(dashes) { ALPHABET[dashes.length - 1] }
+      DOT => ->(dots_sequence) { dots_sequence.length },
+      DASH => ->(dashes_sequence) { ALPHABET[dashes_sequence.length - 1] }
     }
   end
 
@@ -62,6 +88,20 @@ module Morse
   WORD_SEPARATOR = '/'.freeze
   CHAR_SEPARATOR = '|'.freeze
 
+  # Represents a Morse encoder that, provided a set of definitions,
+  # encodes plain text strings or files contents. Every encoded character
+  # is separated with a pipe (|) and every word is separated with a forward slash (/).
+  # It also does not care about letter case.
+  # Example:
+  #
+  # encoder = Encoder.new(definitions)
+  # encoder.encode_text('HELLO WORLD')  # Returns '....|.|.-..|.-..|---/.--|---|.-.|.-..|-..'
+  # encoder.encode_file('path/to/file') # Returns '....|.|.-..|.-..|---/.--|---|.-.|.-..|-..'
+  #
+  # encoder = Encoder.new(obfuscated_definitions)
+  # encoder.encode_text('HELLO WORLD')  # Returns '4|1|1A2|1A2|C/1B|C|1A1|1A2|A2'
+  # encoder.encode_file('path/to/file') # Returns '4|1|1A2|1A2|C/1B|C|1A1|1A2|A2'
+  #
   class Encoder
     def initialize(definitions = DEFINITIONS)
       @definitions = definitions
@@ -86,6 +126,9 @@ module Morse
     end
   end
 
+  # Encoder responsible to encoding a given file's content.
+  # It encodes the text string with a TextEncoder.
+  #
   class FileEncoder
     def initialize(filepath, definitions = DEFINTIONS)
       @file_path = filepath
@@ -125,6 +168,9 @@ module Morse
     end
   end
 
+  # Encoder responsible to encoding a text string.
+  # It encodes each word of the text with a WordEncoder.
+  #
   class TextEncoder
     def initialize(text, definitions = DEFINTIONS)
       @text = text || ''
@@ -150,6 +196,9 @@ module Morse
     end
   end
 
+  # Encoder responsible to encoding a word.
+  # It encodes each character based on the received definitions.
+  #
   class WordEncoder
     def initialize(word, definitions = DEFINITIONS)
       @word = word
