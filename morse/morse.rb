@@ -118,7 +118,7 @@ module Morse
     private
 
     def text_encoder(text)
-      TextEncoder.new(text, @definitions)
+      TextEncoder.new(text || '', @definitions)
     end
 
     def file_encoder(filepath)
@@ -154,26 +154,52 @@ module Morse
     end
 
     def encoded_content
-      @encoded_content ||= file_content.map do |line|
-        line_encoder(line).encoded
-      end
+      text_encoder(file_content).encoded
     end
 
     def file_content
-      @file_content ||= File.readlines(@file_path)
+      File.read(@file_path)
     end
 
-    def line_encoder(line)
-      TextEncoder.new(line, @definitions)
+    def text_encoder(text)
+      TextEncoder.new(text, @definitions)
     end
   end
 
   # Encoder responsible to encoding a text string.
-  # It encodes each word of the text with a WordEncoder.
+  # It encodes each line of the text with a LineEncoder.
   #
   class TextEncoder
     def initialize(text, definitions = DEFINTIONS)
-      @text = text || ''
+      @text = text
+      @definitions = definitions
+    end
+
+    def encoded
+      encoded_lines.join("\n")
+    end
+
+    private
+
+    def encoded_lines
+      lines.map { |line| line_encoder(line).encoded }
+    end
+
+    def lines
+      @text.split("\n")
+    end
+
+    def line_encoder(line)
+      LineEncoder.new(line, @definitions)
+    end
+  end
+
+  # Encoder responsible to encoding a line string.
+  # It encodes each word of the text with a WordEncoder.
+  #
+  class LineEncoder
+    def initialize(line, definitions = DEFINTIONS)
+      @line = line
       @definitions = definitions
     end
 
@@ -188,7 +214,7 @@ module Morse
     end
 
     def words
-      @text.split(' ')
+      @line.split(' ')
     end
 
     def word_encoder(word)

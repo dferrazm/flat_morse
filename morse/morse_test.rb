@@ -50,6 +50,13 @@ class TestMorseEncoder < Minitest::Test
     )
   end
 
+  def test_encoding_of_text_with_line_breaks
+    assert_equal(
+      "../.-|--/..|-.\n-|.-.|---|..-|-...|.-..|.",
+      morse.encode_text("I AM IN\nTROUBLE")
+    )
+  end
+
   def test_encoding_of_empty_string
     assert_equal '', morse.encode_text('')
   end
