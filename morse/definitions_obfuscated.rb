@@ -19,6 +19,15 @@ module Morse
   #   obfuscated.code('c') # => raise +InvalidChar+
   #
   class DefinitionsObfuscated
+    ALPHABET = ('A'..'Z').to_a.freeze
+    DOT = '.'.freeze
+    DASH = '-'.freeze
+
+    OBFUSCATOR = {
+      DOT => ->(dots_sequence) { dots_sequence.length },
+      DASH => ->(dashes_sequence) { ALPHABET[dashes_sequence.length - 1] }
+    }.freeze
+
     def initialize(definitions)
       @definitions = definitions
     end
@@ -47,14 +56,5 @@ module Morse
     def char_sequences(code)
       code.scan(/((.)\2*)/)
     end
-
-    ALPHABET = ('A'..'Z').to_a.freeze
-    DOT = '.'.freeze
-    DASH = '-'.freeze
-
-    OBFUSCATOR = {
-      DOT => ->(dots_sequence) { dots_sequence.length },
-      DASH => ->(dashes_sequence) { ALPHABET[dashes_sequence.length - 1] }
-    }
   end
 end

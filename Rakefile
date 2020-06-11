@@ -21,5 +21,5 @@ namespace :morse do
 end
 
 def morse
-  Morse::Encoder.new(Morse::OBFUSCATED_DEFINITIONS)
+  Morse::EncoderObfuscated.new
 end

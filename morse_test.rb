@@ -154,6 +154,6 @@ class TestObfuscatedMorseEncoder < Minitest::Test
   private
 
   def morse
-    @obfuscated_morse ||= Morse::Encoder.new(Morse::OBFUSCATED_DEFINITIONS)
+    @obfuscated_morse ||= Morse::EncoderObfuscated.new
   end
 end

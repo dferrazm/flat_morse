@@ -1,5 +1,3 @@
-require 'forwardable'
-
 module Morse
   module Input
     # :nodoc:
