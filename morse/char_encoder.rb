@@ -1,7 +1,7 @@
 module Morse
   ##
   # Responsible to encode a given string character.
-  class CharEncoder
+  class CharEncoder < BaseEncoder
     def initialize(definitions)
       @definitions = definitions
     end
