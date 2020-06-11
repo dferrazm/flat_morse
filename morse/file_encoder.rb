@@ -3,39 +3,23 @@ module Morse
   # Responsible to encode a given file's content, writing
   # the encoded content to a separate '.encoded' file.
   class FileEncoder
-    def initialize(filepath, definitions = DEFINTIONS)
-      @file_path = filepath
-      @encoded_file_path = "#{@file_path}.encoded"
-      @definitions = definitions
+    def initialize(definitions)
+      @text_encoder = TextEncoder.new(definitions)
     end
 
-    def encoded
-      File.absolute_path(encoded_file)
+    def encoded(file)
+      encoded_content = encoded_content(file.text_content)
+
+      File.open("#{file.filepath}.encoded", 'w+').tap do |f|
+        f.puts(encoded_content)
+        f.close
+      end
     end
 
     private
 
-    def encoded_file
-      @encoded_file ||= begin
-        content = encoded_content
-
-        File.open(@encoded_file_path, "w+").tap do |f|
-          f.puts(content)
-          f.close
-        end
-      end
-    end
-
-    def encoded_content
-      text_encoder(file_content).encoded
-    end
-
-    def file_content
-      File.read(@file_path)
-    end
-
-    def text_encoder(text)
-      TextEncoder.new(text, @definitions)
+    def encoded_content(text_content)
+      @text_encoder.encoded(text_content)
     end
   end
 end

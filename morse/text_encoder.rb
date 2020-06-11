@@ -3,27 +3,18 @@ module Morse
   # Responsible to encode a given text string, i.e.,
   # a whole text which can contain several lines.
   class TextEncoder
-    def initialize(text, definitions = DEFINTIONS)
-      @text = text
-      @definitions = definitions
+    def initialize(definitions)
+      @line_encoder = LineEncoder.new(definitions)
     end
 
-    def encoded
-      encoded_lines.join("\n")
+    def encoded(text)
+      encoded_lines(text.lines).join(LINE_SEPARATOR)
     end
 
     private
 
-    def encoded_lines
-      lines.map { |line| line_encoder(line).encoded }
-    end
-
-    def lines
-      @text.split("\n")
-    end
-
-    def line_encoder(line)
-      LineEncoder.new(line, @definitions)
+    def encoded_lines(lines)
+      lines.map { |line| @line_encoder.encoded(line) }
     end
   end
 end

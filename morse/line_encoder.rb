@@ -1,28 +1,20 @@
 module Morse
+  ##
   # Responsible to encode a single line string, i.e.,
   # a set of words in a single file not containing any line break.
   class LineEncoder
-    def initialize(line, definitions = DEFINTIONS)
-      @line = line
-      @definitions = definitions
+    def initialize(definitions)
+      @word_encoder = WordEncoder.new(definitions)
     end
 
-    def encoded
-      encoded_words.join(WORD_SEPARATOR)
+    def encoded(line)
+      encoded_words(line.words).join(WORD_SEPARATOR)
     end
 
     private
 
-    def encoded_words
-      words.map { |word| word_encoder(word).encoded }
-    end
-
-    def words
-      @line.split(' ')
-    end
-
-    def word_encoder(word)
-      WordEncoder.new(word, @definitions)
+    def encoded_words(words)
+      words.map { |word| @word_encoder.encoded(word) }
     end
   end
 end

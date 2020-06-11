@@ -16,25 +16,17 @@ module Morse
   #
   class Encoder
     def initialize(definitions = DEFINITIONS)
-      @definitions = definitions
+      @text_encoder = TextEncoder.new(definitions)
+      @file_encoder = FileEncoder.new(definitions)
     end
 
     def encode_text(text)
-      text_encoder(text).encoded
+      @text_encoder.encoded(Input::Text.new(text))
     end
 
-    def encode_file(file)
-      file_encoder(file).encoded
-    end
-
-    private
-
-    def text_encoder(text)
-      TextEncoder.new(text || '', @definitions)
-    end
-
-    def file_encoder(filepath)
-      FileEncoder.new(filepath, @definitions)
+    def encode_file(filepath)
+      file = @file_encoder.encoded(Input::File.new(filepath))
+      file.path
     end
   end
 end
